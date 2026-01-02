@@ -1,0 +1,225 @@
+/* Reset only inside register */
+.register-card * {
+  box-sizing: border-box;
+}
+
+/* Page background */
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #eef2f7, #f8fafc);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+}
+
+/* Card */
+.register-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 480px;
+  padding: 34px;
+  border-radius: 16px;
+  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.08);
+}
+
+/* Title */
+.register-card h2 {
+  text-align: center;
+  margin-bottom: 28px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Two-column row */
+.form-row {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.form-row input {
+  flex: 1;
+}
+
+/* Inputs */
+.register-card input[type="text"],
+.register-card input[type="email"],
+.register-card input[type="password"] {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  outline: none;
+}
+
+/* Focus */
+.register-card input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* Subdomain preview */
+.subdomain-preview {
+  font-size: 12px;
+  color: #6b7280;
+  margin: -6px 0 14px;
+}
+
+/* Password row */
+.password-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+/* Password input */
+.password-row input {
+  flex: 1;
+}
+
+/* 🔥 FIXED Show/Hide button */
+.password-row button {
+  all: unset; /* ✅ removes weird browser styles */
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-row button:hover {
+  background: #eef2ff;
+}
+
+/* Terms */
+.terms {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  margin: 16px 0 20px;
+  color: #374151;
+}
+
+/* 🔥 FIX checkbox alignment */
+.terms input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+/* Error */
+.error {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+/* Success */
+.success {
+  background: #dcfce7;
+  color: #166534;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+/* Register button */
+.register-btn {
+  width: 100%;
+  height: 46px;
+  border-radius: 12px;
+  border: none;
+  background: #6366f1;
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.register-btn:hover {
+  background: #4f46e5;
+}
+
+.register-btn:disabled {
+  background: #a5b4fc;
+  cursor: not-allowed;
+}
+
+/* Footer */
+.register-footer {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 13px;
+}
+
+.register-footer a {
+  color: #6366f1;
+  font-weight: 500;
+  text-decoration: none;
+}
+/* Ensure all inputs have SAME height */
+.register-card input[type="text"],
+.register-card input[type="email"],
+.register-card input[type="password"] {
+  height: 48px;
+}
+
+/* Fix two-column row inputs */
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row input {
+  flex: 1;
+}
+
+/* Fix Admin Full Name spacing */
+.register-card input[name="adminFullName"] {
+  margin-bottom: 16px;
+}
+
+/* Fix password row alignment */
+.password-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.password-row input {
+  height: 48px;
+}
+
+/* Fix Show button height */
+.password-row button {
+  height: 48px;
+  min-width: 70px;
+}
+
+/* Improve checkbox alignment */
+.terms {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 22px;
+}
+
+/* Improve button spacing */
+.register-btn {
+  margin-top: 6px;
+}
