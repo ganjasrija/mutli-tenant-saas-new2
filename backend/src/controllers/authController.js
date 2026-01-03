@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import pool from "../config/db.js";
 import jwt from "jsonwebtoken";
 const generateToken = (payload) => {
@@ -87,30 +87,43 @@ export const registerTenant = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password, tenantSubdomain } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "Email and password are required",
-    });
-  }
-
   try {
-    // 1️⃣ Get user by email
-    const userResult = await pool.query(
-      `SELECT * FROM users WHERE email = $1`,
-      [email]
-    );
+    let userQuery;
+    let values;
 
-    if (userResult.rows.length === 0) {
+    /* 🔹 SUPER ADMIN LOGIN (NO TENANT) */
+    if (!tenantSubdomain) {
+      userQuery = `
+        SELECT * FROM users
+        WHERE email = $1 AND role = 'super_admin' AND is_active = true
+      `;
+      values = [email];
+    } 
+    /* 🔹 TENANT ADMIN / USER LOGIN */
+    else {
+      userQuery = `
+        SELECT u.*
+        FROM users u
+        JOIN tenants t ON u.tenant_id = t.id
+        WHERE u.email = $1
+          AND t.subdomain = $2
+          AND u.is_active = true
+      `;
+      values = [email, tenantSubdomain];
+    }
+
+    const result = await pool.query(userQuery, values);
+
+    if (result.rows.length === 0) {
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
       });
     }
 
-    const user = userResult.rows[0];
+    const user = result.rows[0];
 
-    // 2️⃣ Check password
+    /* 🔐 PASSWORD CHECK */
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
       return res.status(401).json({
@@ -119,99 +132,39 @@ export const login = async (req, res) => {
       });
     }
 
-    // 🔑 SUPER ADMIN LOGIN (NO TENANT)
-    if (user.role === "super_admin") {
-      const token = generateToken({
-        userId: user.id,
-        tenantId: null,
+    /* 🎟️ TOKEN */
+    const token = jwt.sign(
+      {
+        id: user.id,
         role: user.role,
-      });
-
-      return res.status(200).json({
-        success: true,
-        data: {
-          user: {
-            id: user.id,
-            email: user.email,
-            fullName: user.full_name,
-            role: user.role,
-            tenantId: null,
-          },
-          token,
-          expiresIn: 86400,
-        },
-      });
-    }
-
-    // 3️⃣ TENANT REQUIRED FOR NORMAL USERS
-    if (!tenantSubdomain) {
-      return res.status(400).json({
-        success: false,
-        message: "tenantSubdomain is required",
-      });
-    }
-
-    const tenantResult = await pool.query(
-      `SELECT * FROM tenants WHERE subdomain = $1`,
-      [tenantSubdomain]
+        tenantId: user.tenant_id,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
-    if (tenantResult.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Tenant not found",
-      });
-    }
-
-    const tenant = tenantResult.rows[0];
-
-    if (tenant.status !== "active") {
-      return res.status(403).json({
-        success: false,
-        message: "Tenant is not active",
-      });
-    }
-
-    if (user.tenant_id !== tenant.id) {
-      return res.status(403).json({
-        success: false,
-        message: "User does not belong to this tenant",
-      });
-    }
-
-    // 4️⃣ Generate token for tenant users
-    const token = generateToken({
-      userId: user.id,
-      tenantId: tenant.id,
-      role: user.role,
-    });
-
-    return res.status(200).json({
+    /* ✅ SUCCESS */
+    res.json({
       success: true,
       data: {
+        token,
         user: {
           id: user.id,
           email: user.email,
           fullName: user.full_name,
           role: user.role,
-          tenantId: tenant.id,
+          tenantId: user.tenant_id,
         },
-        token,
-        expiresIn: 86400,
       },
     });
-
-  } catch (error) {
-  console.error("LOGIN ERROR FULL:", error);
-
-  return res.status(500).json({
-    success: false,
-    message: error.message,   // 👈 SHOW REAL ERROR
-  });
-}
-
-}
-
+  } catch (err) {
+    console.error("LOGIN ERROR FULL:", err);
+    res.status(500).json({
+      success: false,
+      message: "Login failed",
+    });
+  }
+};
 /*
  * 
  * API 3: Get Current User

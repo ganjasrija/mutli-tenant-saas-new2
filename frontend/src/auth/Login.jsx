@@ -7,7 +7,6 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [tenantSubdomain, setTenantSubdomain] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,12 +29,8 @@ export default function Login() {
       const token = res.data.data.token;
       const user = res.data.data.user;
 
-      // ✅ Remember Me logic
-      if (rememberMe) {
-        localStorage.setItem("token", token);
-      } else {
-        sessionStorage.setItem("token", token);
-      }
+      // ✅ ALWAYS store token in localStorage
+      localStorage.setItem("token", token);
 
       // ✅ Save user in context
       login(token, user);
@@ -55,11 +50,9 @@ export default function Login() {
     <div style={{ padding: "40px", maxWidth: "400px", margin: "auto" }}>
       <h2>Login</h2>
 
-      {/* Error Message */}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       <form onSubmit={handleSubmit}>
-        {/* Email */}
         <div style={{ marginBottom: "10px" }}>
           <input
             type="email"
@@ -70,7 +63,6 @@ export default function Login() {
           />
         </div>
 
-        {/* Password */}
         <div style={{ marginBottom: "10px" }}>
           <input
             type="password"
@@ -81,7 +73,6 @@ export default function Login() {
           />
         </div>
 
-        {/* Tenant Subdomain */}
         <div style={{ marginBottom: "10px" }}>
           <input
             type="text"
@@ -92,25 +83,11 @@ export default function Login() {
           />
         </div>
 
-        {/* Remember Me */}
-        <div style={{ marginBottom: "15px" }}>
-          <label>
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-            />{" "}
-            Remember me
-          </label>
-        </div>
-
-        {/* Submit Button */}
         <button type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </button>
       </form>
 
-      {/* Register Link */}
       <p style={{ marginTop: "15px" }}>
         Don’t have an account? <Link to="/register">Register</Link>
       </p>
