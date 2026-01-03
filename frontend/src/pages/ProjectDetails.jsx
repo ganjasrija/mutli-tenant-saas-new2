@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import api from "../api/api";
 import Navbar from "../components/Navbar";
 import TaskModal from "../components/TaskModal";
+import "./ProjectDetails.css";
 
 export default function ProjectDetails() {
   const { projectId } = useParams();
@@ -11,44 +12,50 @@ export default function ProjectDetails() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ MODAL STATE
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
 
   useEffect(() => {
     loadData();
-  }, [projectId]);
+  }, []);
 
   const loadData = async () => {
     try {
-      setLoading(true);
-
-      // ✅ API 13 — LIST PROJECTS
-      const projectRes = await api.get("/projects");
-      const foundProject = projectRes.data.data.projects
-        ? projectRes.data.data.projects.find(p => p.id === projectId)
-        : projectRes.data.data.find(p => p.id === projectId);
-
-      setProject(foundProject || null);
-
-      // ✅ Tasks API (you already have this)
+      const projectRes = await api.get(`/projects/${projectId}`);
       const taskRes = await api.get(`/projects/${projectId}/tasks`);
+
+      setProject(projectRes.data.data);
       setTasks(taskRes.data.data);
     } catch (err) {
-      console.error("Load error", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateStatus = async (taskId, status) => {
-    await api.patch(`/tasks/${taskId}/status`, { status });
-    loadData();
+  /* =========================
+     ACTION HANDLERS
+  ========================= */
+
+  const changeStatus = async (taskId, status) => {
+    try {
+      await api.patch(`/tasks/${taskId}/status`, { status });
+      loadData();
+    } catch {
+      alert("Failed to update status");
+    }
   };
 
   const deleteTask = async (taskId) => {
-    if (!window.confirm("Delete task?")) return;
-    await api.delete(`/tasks/${taskId}`);
-    loadData();
+    if (!window.confirm("Delete this task?")) return;
+
+    try {
+      await api.delete(`/tasks/${taskId}`);
+      loadData();
+    } catch {
+      alert("Delete failed");
+    }
   };
 
   if (loading) return <p>Loading...</p>;
@@ -58,42 +65,93 @@ export default function ProjectDetails() {
     <>
       <Navbar />
 
-      <div style={{ padding: 20 }}>
-        <h2>{project.name}</h2>
-        <p>{project.description}</p>
-        <p><b>Status:</b> {project.status}</p>
+      <div className="project-page">
+        {/* HEADER */}
+        <div className="project-header">
+          <div>
+            <h1>{project.name}</h1>
+            <p className="description">{project.description}</p>
+          </div>
 
-        <hr />
+          <span className={`status ${project.status}`}>
+            {project.status}
+          </span>
+        </div>
 
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <h3>Tasks</h3>
-          <button onClick={() => {
-            setSelectedTask(null);
-            setShowTaskModal(true);
-          }}>
+        {/* TASK HEADER */}
+        <div className="tasks-header">
+          <h2>Tasks</h2>
+
+          {/* ✅ ADD TASK WORKING */}
+          <button
+            className="primary-btn"
+            onClick={() => {
+              setSelectedTask(null);
+              setShowTaskModal(true);
+            }}
+          >
             + Add Task
           </button>
         </div>
 
-        {tasks.length === 0 && <p>No tasks found</p>}
+        {/* TASKS */}
+        <div className="task-grid">
+          {tasks.map((t) => (
+            <div key={t.id} className="task-card">
+              <div className="task-top">
+                <h3>{t.title}</h3>
+                <span className={`priority ${t.priority}`}>
+                  {t.priority}
+                </span>
+              </div>
 
-        {tasks.map((t) => (
-          <div key={t.id} style={{ border: "1px solid #ccc", padding: 10, marginBottom: 8 }}>
-            <b>{t.title}</b>
-            <p>Status: {t.status}</p>
+              <div className="meta">
+                <span className={`badge ${t.status}`}>
+                  {t.status}
+                </span>
+                <span className="assignee">
+                  👤 {t.full_name || "Unassigned"}
+                </span>
+              </div>
 
-            <button onClick={() => updateStatus(t.id, "todo")}>Todo</button>
-            <button onClick={() => updateStatus(t.id, "in_progress")}>In Progress</button>
-            <button onClick={() => updateStatus(t.id, "completed")}>Completed</button>
-            <button onClick={() => {
-              setSelectedTask(t);
-              setShowTaskModal(true);
-            }}>Edit</button>
-            <button onClick={() => deleteTask(t.id)}>Delete</button>
-          </div>
-        ))}
+              {/* ACTION BUTTONS */}
+              <div className="task-actions">
+                <button onClick={() => changeStatus(t.id, "todo")}>
+                  Todo
+                </button>
+
+                <button onClick={() => changeStatus(t.id, "in_progress")}>
+                  In Progress
+                </button>
+
+                <button onClick={() => changeStatus(t.id, "completed")}>
+                  Completed
+                </button>
+
+                {/* ✅ EDIT WORKING */}
+                <button
+                  className="edit"
+                  onClick={() => {
+                    setSelectedTask(t);
+                    setShowTaskModal(true);
+                  }}
+                >
+                  Edit
+                </button>
+
+                <button
+                  className="danger"
+                  onClick={() => deleteTask(t.id)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
+      {/* ✅ TASK MODAL */}
       {showTaskModal && (
         <TaskModal
           projectId={projectId}

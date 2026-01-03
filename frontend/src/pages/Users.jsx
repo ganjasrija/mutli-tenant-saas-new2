@@ -14,6 +14,10 @@ export default function Users() {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
+  // ✅ NEW
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+
   useEffect(() => {
     if (user?.role === "tenant_admin") {
       loadUsers();
@@ -25,7 +29,7 @@ export default function Users() {
       setLoading(true);
       const res = await api.get(`/tenants/${user.tenantId}/users`);
       setUsers(res.data.data.users);
-    } catch (err) {
+    } catch {
       setError("Failed to load users");
     } finally {
       setLoading(false);
@@ -34,16 +38,22 @@ export default function Users() {
 
   const deleteUser = async (id) => {
     if (!window.confirm("Delete this user?")) return;
-
-    try {
-      await api.delete(`/users/${id}`);
-      loadUsers();
-    } catch (err) {
-      alert(err.response?.data?.message || "Delete failed");
-    }
+    await api.delete(`/users/${id}`);
+    loadUsers();
   };
 
-  // 🔒 Role-based access
+  // 🔍 FILTER LOGIC
+  const filteredUsers = users.filter((u) => {
+    const matchSearch =
+      u.fullName.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase());
+
+    const matchRole =
+      roleFilter === "all" || u.role === roleFilter;
+
+    return matchSearch && matchRole;
+  });
+
   if (user.role !== "tenant_admin") {
     return (
       <>
@@ -60,23 +70,41 @@ export default function Users() {
       <div style={{ padding: 20 }}>
         <h2>Users</h2>
 
-        {/* ✅ Add User Button */}
-        <button
-          style={{ marginBottom: 15 }}
-          onClick={() => {
-            setSelectedUser(null);
-            setShowModal(true);
-          }}
-        >
-          + Add User
-        </button>
+        {/* 🔍 SEARCH + FILTER */}
+        <div style={{ display: "flex", gap: 10, marginBottom: 15 }}>
+          <input
+            placeholder="Search by name or email"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+          >
+            <option value="all">All Roles</option>
+            <option value="user">User</option>
+            <option value="tenant_admin">Tenant Admin</option>
+          </select>
+
+          <button
+            onClick={() => {
+              setSelectedUser(null);
+              setShowModal(true);
+            }}
+          >
+            + Add User
+          </button>
+        </div>
 
         {loading && <p>Loading...</p>}
         {error && <p style={{ color: "red" }}>{error}</p>}
 
-        {users.length === 0 && !loading && <p>No users found</p>}
+        {filteredUsers.length === 0 && !loading && (
+          <p>No users found</p>
+        )}
 
-        {users.length > 0 && (
+        {filteredUsers.length > 0 && (
           <table border="1" cellPadding="8" width="100%">
             <thead>
               <tr>
@@ -90,17 +118,36 @@ export default function Users() {
             </thead>
 
             <tbody>
-              {users.map((u) => (
+              {filteredUsers.map((u) => (
                 <tr key={u.id}>
                   <td>{u.fullName}</td>
                   <td>{u.email}</td>
-                  <td>{u.role}</td>
+
+                  {/* 🏷️ ROLE BADGE */}
+                  <td>
+                    <span
+                      style={{
+                        padding: "4px 8px",
+                        borderRadius: 6,
+                        fontSize: 12,
+                        background:
+                          u.role === "tenant_admin"
+                            ? "#e0e7ff"
+                            : "#dcfce7",
+                      }}
+                    >
+                      {u.role}
+                    </span>
+                  </td>
+
                   <td style={{ color: u.isActive ? "green" : "red" }}>
                     {u.isActive ? "Active" : "Inactive"}
                   </td>
+
                   <td>
                     {new Date(u.createdAt).toLocaleDateString()}
                   </td>
+
                   <td>
                     <button
                       onClick={() => {
@@ -121,7 +168,6 @@ export default function Users() {
         )}
       </div>
 
-      {/* ✅ User Modal */}
       {showModal && (
         <UserModal
           tenantId={user.tenantId}

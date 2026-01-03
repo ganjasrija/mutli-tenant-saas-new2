@@ -1,6 +1,7 @@
 import express from "express";
 import authMiddleware from "../middleware/authMiddleware.js";
 import {
+  listAllTasks,        // 👈 ADD
   updateTaskStatus,
   updateTask,
   deleteTask
@@ -9,20 +10,22 @@ import {
 const router = express.Router();
 
 /**
- * API 18: Update Task Status
- * PATCH /api/tasks/:taskId/status
+ * API 21: GET /api/tasks
+ */
+router.get("/", authMiddleware, listAllTasks);
+
+/**
+ * API 18
  */
 router.patch("/:taskId/status", authMiddleware, updateTaskStatus);
 
 /**
- * API 19: Update Task
- * PUT /api/tasks/:taskId
+ * API 19
  */
 router.put("/:taskId", authMiddleware, updateTask);
 
 /**
- * API 20: Delete Task
- * DELETE /api/tasks/:taskId
+ * API 20
  */
 router.delete("/:taskId", authMiddleware, deleteTask);
 

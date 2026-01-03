@@ -1,83 +1,97 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api/api";
+import "./TaskModal.css";
 
 export default function TaskModal({ projectId, task, onClose, onSuccess }) {
-  const [title, setTitle] = useState(task?.title || "");
-  const [description, setDescription] = useState(task?.description || "");
-  const [priority, setPriority] = useState(task?.priority || "medium");
-  const [error, setError] = useState("");
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    priority: "medium",
+    status: "todo",
+  });
 
-  const submit = async () => {
-    if (!title) {
-      setError("Title is required");
-      return;
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (task) {
+      setForm({
+        title: task.title,
+        description: task.description || "",
+        priority: task.priority,
+        status: task.status,
+      });
     }
+  }, [task]);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
     try {
+      setLoading(true);
+
       if (task) {
-        // 🔹 UPDATE TASK
-        await api.put(`/tasks/${task.id}`, {
-          title,
-          description,
-          priority,
-        });
+        // ✅ EDIT TASK
+        await api.put(`/tasks/${task.id}`, form);
       } else {
-        // 🔹 CREATE TASK
-        await api.post(`/projects/${projectId}/tasks`, {
-          title,
-          description,
-          priority,
-        });
+        // ✅ ADD TASK
+        await api.post(`/projects/${projectId}/tasks`, form);
       }
 
-      onSuccess(); // reload tasks
-      onClose();   // close modal
+      onSuccess();
+      onClose();
     } catch (err) {
-      setError("Task operation failed");
+      alert("Task save failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        background: "rgba(0,0,0,0.4)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div style={{ background: "#fff", padding: 20, width: 400 }}>
+    <div className="modal-backdrop">
+      <div className="modal-card">
         <h3>{task ? "Edit Task" : "Add Task"}</h3>
 
-        <input
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+        <form onSubmit={handleSubmit}>
+          <input
+            name="title"
+            placeholder="Task title"
+            value={form.title}
+            onChange={handleChange}
+            required
+          />
 
-        <textarea
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
+          <textarea
+            name="description"
+            placeholder="Description"
+            value={form.description}
+            onChange={handleChange}
+          />
 
-        <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
+          <select name="priority" value={form.priority} onChange={handleChange}>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
+          <select name="status" value={form.status} onChange={handleChange}>
+            <option value="todo">Todo</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
 
-        <div style={{ marginTop: 10 }}>
-          <button onClick={submit}>Save</button>{" "}
-          <button onClick={onClose}>Cancel</button>
-        </div>
+          <div className="modal-actions">
+            <button type="button" onClick={onClose}>
+              Cancel
+            </button>
+            <button disabled={loading}>
+              {loading ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

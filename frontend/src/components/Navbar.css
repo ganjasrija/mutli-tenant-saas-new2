@@ -1,62 +1,100 @@
+/* ===== NAVBAR WRAPPER ===== */
 .navbar {
-  height: 60px;
-  background: #0f172a;
-  color: white;
+  height: 64px;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
+/* ===== LEFT SECTION ===== */
 .navbar-left {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 28px; /* 🔥 THIS FIXES TEXT MERGING */
 }
 
+/* Logo */
 .logo {
-  font-weight: 600;
   font-size: 18px;
-  margin-right: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin-right: 12px;
 }
 
+/* Links */
 .navbar a {
-  color: #cbd5f5;
+  color: #e5e7eb;
   text-decoration: none;
-  font-size: 14px;
-  padding: 6px 10px;
-  border-radius: 6px;
+  font-size: 14.5px;
+  font-weight: 500;
+  padding: 6px 4px;
+  position: relative;
+  transition: color 0.2s ease;
 }
 
+/* Hover */
 .navbar a:hover {
-  background: #1e293b;
-  color: white;
+  color: #ffffff;
 }
 
+/* Active underline (auto for react-router) */
+.navbar a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0%;
+  height: 2px;
+  background: #6366f1;
+  transition: width 0.2s ease;
+}
+
+.navbar a:hover::after {
+  width: 100%;
+}
+
+/* ===== RIGHT SECTION ===== */
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 18px;
 }
 
+/* User info */
 .user-info {
   font-size: 14px;
+  font-weight: 500;
+  color: #e5e7eb;
 }
 
 .user-info small {
   color: #94a3b8;
+  font-size: 12px;
+  margin-left: 4px;
 }
 
+/* Logout button */
 .logout-btn {
   background: #6366f1;
   border: none;
-  padding: 6px 14px;
-  border-radius: 6px;
+  padding: 8px 18px;
+  border-radius: 10px;
   color: white;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
 
 .logout-btn:hover {
   background: #4f46e5;
+  transform: translateY(-1px);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
 }

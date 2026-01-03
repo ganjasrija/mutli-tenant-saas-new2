@@ -167,3 +167,46 @@ export const deleteTask = async (req, res) => {
 
   res.json({ success: true, message: "Task deleted" });
 };
+/* =========================
+   API 21: LIST ALL TASKS
+   GET /api/tasks
+========================= */
+export const listAllTasks = async (req, res) => {
+  const { tenantId } = req.user;
+  const { status, priority } = req.query;
+
+  let conditions = ["t.tenant_id = $1"];
+  let values = [tenantId];
+  let index = 2;
+
+  if (status && status !== "all") {
+    conditions.push(`t.status = $${index++}`);
+    values.push(status);
+  }
+
+  if (priority && priority !== "all") {
+    conditions.push(`t.priority = $${index++}`);
+    values.push(priority);
+  }
+
+  const whereClause = conditions.join(" AND ");
+
+  const result = await pool.query(
+    `
+    SELECT
+      t.id,
+      t.title,
+      t.status,
+      t.priority,
+      t.created_at,
+      p.name AS project_name
+    FROM tasks t
+    JOIN projects p ON p.id = t.project_id
+    WHERE ${whereClause}
+    ORDER BY t.created_at DESC
+    `,
+    values
+  );
+
+  res.json({ success: true, data: result.rows });
+};

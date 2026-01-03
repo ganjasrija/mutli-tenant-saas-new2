@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import api from "../api/api";
 import { AuthContext } from "../auth/AuthContext";
 import Navbar from "../components/Navbar";
-
+import "./Dashboard.css";
 
 export default function Dashboard() {
   const { user } = useContext(AuthContext);
@@ -22,81 +22,92 @@ export default function Dashboard() {
 
   const loadDashboard = async () => {
     try {
-      // 🔹 Get projects
       const projectRes = await api.get("/projects");
       const projectList = projectRes.data.data;
       setProjects(projectList);
 
       let allTasks = [];
-
-      // 🔹 Get tasks for each project
       for (let p of projectList) {
         const taskRes = await api.get(`/projects/${p.id}/tasks`);
         allTasks = [...allTasks, ...taskRes.data.data];
       }
 
-      // 🔹 Filter tasks assigned to current user
       const assignedTasks = allTasks.filter(
         (t) => t.assigned_user_id === user.id
       );
-
       setMyTasks(assignedTasks);
-
-      // 🔹 Stats
-      const completed = allTasks.filter((t) => t.status === "completed").length;
-      const pending = allTasks.filter((t) => t.status !== "completed").length;
 
       setStats({
         totalProjects: projectList.length,
         totalTasks: allTasks.length,
-        completedTasks: completed,
-        pendingTasks: pending,
+        completedTasks: allTasks.filter(t => t.status === "completed").length,
+        pendingTasks: allTasks.filter(t => t.status !== "completed").length,
       });
-    } catch (error) {
-      console.error("Dashboard load error:", error);
+    } catch (err) {
+      console.error(err);
     }
   };
-return (
-  <>
-    <Navbar />
 
-    <div style={{ padding: "20px" }}>
-      <h2>Dashboard</h2>
+  return (
+    <>
+      <Navbar />
 
-      <p>
-        Welcome <b>{user.fullName}</b> ({user.role})
-      </p>
+      <div className="dashboard">
+        <h2>Dashboard</h2>
+        <p className="welcome">
+          Welcome <b>{user.fullName}</b> ({user.role})
+        </p>
 
-      {/* 🔹 Stats */}
-      <div style={{ display: "flex", gap: 20 }}>
-        <div>Projects: {stats.totalProjects}</div>
-        <div>Total Tasks: {stats.totalTasks}</div>
-        <div>Completed: {stats.completedTasks}</div>
-        <div>Pending: {stats.pendingTasks}</div>
+        {/* STATS */}
+        <div className="stats-grid">
+          <div className="stat-card">
+            <h3>{stats.totalProjects}</h3>
+            <p>Projects</p>
+          </div>
+          <div className="stat-card">
+            <h3>{stats.totalTasks}</h3>
+            <p>Total Tasks</p>
+          </div>
+          <div className="stat-card success">
+            <h3>{stats.completedTasks}</h3>
+            <p>Completed</p>
+          </div>
+          <div className="stat-card warning">
+            <h3>{stats.pendingTasks}</h3>
+            <p>Pending</p>
+          </div>
+        </div>
+
+        {/* RECENT PROJECTS */}
+        <div className="section">
+          <h3>Recent Projects</h3>
+          {projects.slice(0, 5).map((p) => (
+            <div key={p.id} className="list-card">
+              <span>{p.name}</span>
+              <span className={`badge ${p.status}`}>{p.status}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* MY TASKS */}
+        <div className="section">
+          <h3>My Tasks</h3>
+
+          {myTasks.length === 0 && (
+            <p className="empty">No tasks assigned</p>
+          )}
+
+          {myTasks.map((t) => (
+            <div key={t.id} className="task-card">
+              <b>{t.title}</b>
+              <div className="task-meta">
+                <span className={`priority ${t.priority}`}>{t.priority}</span>
+                <span className={`badge ${t.status}`}>{t.status}</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-
-      <hr />
-
-      {/* 🔹 Recent Projects */}
-      <h3>Recent Projects</h3>
-      {projects.slice(0, 5).map((p) => (
-        <div key={p.id}>
-          <b>{p.name}</b> — {p.status}
-        </div>
-      ))}
-
-      <hr />
-
-      {/* 🔹 My Tasks */}
-      <h3>My Tasks</h3>
-      {myTasks.length === 0 && <p>No tasks assigned</p>}
-      {myTasks.map((t) => (
-        <div key={t.id}>
-          {t.title} | {t.priority} | {t.status}
-        </div>
-      ))}
-    </div>
-  </>
-);
-
+    </>
+  );
 }

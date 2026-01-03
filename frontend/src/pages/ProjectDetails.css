@@ -1,0 +1,202 @@
+/* ===== PAGE ===== */
+.project-page {
+  padding: 30px;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.project-header h1 {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.description {
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* ===== STATUS ===== */
+.status {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status.archived {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status.completed {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+/* ===== TASK HEADER ===== */
+.tasks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.primary-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.primary-btn:hover {
+  background: #1d4ed8;
+}
+
+/* ===== TASK GRID ===== */
+.task-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+/* ===== TASK CARD ===== */
+.task-card {
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== TOP ===== */
+.task-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-top h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ===== PRIORITY ===== */
+.priority {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.priority.high {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.priority.medium {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.priority.low {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* ===== META ===== */
+.meta {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0;
+  align-items: center;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge.todo {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.badge.in_progress {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.badge.completed {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.assignee {
+  font-size: 13px;
+  color: #475569;
+}
+
+/* ===== ACTIONS ===== */
+.task-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.task-actions button {
+  padding: 8px;
+  border-radius: 10px;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* STATUS BUTTONS */
+.task-actions .todo {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.task-actions .in_progress {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.task-actions .completed {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+/* EDIT */
+.task-actions .edit {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+/* DELETE */
+.task-actions .danger {
+  grid-column: span 2;
+  background: #fee2e2;
+  color: #991b1b;
+}
